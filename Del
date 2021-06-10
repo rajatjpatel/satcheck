@@ -1,0 +1,19 @@
+First, this command will find and delete all files older than 7 days in any subdirectory in /home whose name starts with securityuser:
+
+find /home/securityuser* -mtime +6 -type f -delete
+You need -mtime +6 and not +7 because -mtime counts 24h periods. As explained in the -atime section of man find (-mtime works in the same way):
+
+   -atime n
+          File  was  last  accessed n*24 hours ago.  When find figures out
+          how many 24-hour periods ago the file  was  last  accessed,  any
+          fractional part is ignored, so to match -atime +1, a file has to
+          have been accessed at least two days ago.
+So, to find a file that was modified 7 or more days ago, you need to find files that were modified more than 6 days ago, hence -mtime +6.
+
+The next step is to have this command run once a day. Since each securityuserN is a different user (you might want to rethink that setup, it makes everything more complicated), this must be run as root. So, edit /etc/crontab:
+
+sudo nano /etc/crontab
+And add this line:
+
+@daily root find /home/securityuser* -mtime +6 -type f -delete
+That will run the find command once a day and delete the files.
